@@ -1,6 +1,7 @@
 <img src="/public/icon-96.png" alt="Mailflare" width="72" />
 
 # Mailflare
+Mail server deployment
 
 Mailflare is a self-hosted email inbox for custom domains, built on Cloudflare.
 
