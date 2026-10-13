@@ -58,9 +58,6 @@
 	"observability": {
 		"enabled": true,
 	},
-	"vars": {
-		"GITHUB_UPDATE_REPO": "PrinceMogul3/mailflare"
-	},
 	"upload_source_maps": true,
 	"send_email": [
 		{
@@ -73,13 +70,13 @@
 		{
 			"binding": "DB",
 			"database_name": "mailflare",
-			"migrations_dir": "drizzle/migrations","database_id": "4474f2c0-aca9-46e8-bd59-8700387e982a",
+			"migrations_dir": "drizzle/migrations",
 		},
 	],
 	"r2_buckets": [
 		{
 			"binding": "BUCKET",
-			"bucket_name": "mailflare-raw","preview_bucket_name": "mailflare-raw",
+			"bucket_name": "mailflare-raw",
 		},
 	],
 	"queues": {
