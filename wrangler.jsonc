@@ -58,6 +58,9 @@
 	"observability": {
 		"enabled": true,
 	},
+	"vars": {
+		"GITHUB_UPDATE_REPO": "PrinceMogul3/mailflare"
+	},
 	"upload_source_maps": true,
 	"send_email": [
 		{
