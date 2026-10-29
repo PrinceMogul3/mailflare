@@ -12,7 +12,7 @@ import {
 	RemoveFormatting,
 	Strikethrough,
 	Underline,
-} from "lucide-react";
+} from "@/components/icons";
 import { useLanguage } from "@/components/language-provider";
 import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -185,7 +185,7 @@ export function RichTextEditor({
 	return (
 		<div className={cn("flex min-h-0 flex-1 flex-col", className)}>
 			<div className="sticky top-0 z-10 flex shrink-0 items-center gap-0.5 overflow-x-auto bg-white px-2 py-1 md:hidden">{formatButtons}</div>
-			<div className="relative min-h-0 flex-1 overflow-y-auto">
+			<div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
 				<div
 					ref={editorRef}
 					id={id}
@@ -201,12 +201,12 @@ export function RichTextEditor({
 					onKeyDown={onKeyDown}
 					className={cn(
 						"email-body max-w-none px-4 py-3 text-sm text-neutral-900 outline-none",
-						"min-h-32 empty:before:pointer-events-none empty:before:text-neutral-400 empty:before:content-[attr(data-placeholder)]",
+						"min-h-32 grow shrink-0 empty:before:pointer-events-none empty:before:text-neutral-400 empty:before:content-[attr(data-placeholder)]",
 						disabled && "cursor-not-allowed opacity-60",
 					)}
 				/>
 				{quotedHtml && (
-					<div className="px-4 pb-3">
+					<div className="shrink-0 px-4 pb-3">
 						<button
 							type="button"
 							onClick={() => setShowQuoted((open) => !open)}
@@ -229,28 +229,28 @@ export function RichTextEditor({
 				<div className="contents max-md:hidden">{formatButtons}</div>
 				{toolbarEnd}
 				{linkOpen && (
-					<form
+					<div
 						className="absolute bottom-full left-2 z-10 mb-1 flex items-center gap-2 rounded-lg border border-neutral-200 bg-white p-2 shadow-lg"
-						onSubmit={(event) => {
-							event.preventDefault();
-							applyLink();
-						}}
 					>
 						<input
 							autoFocus
 							value={linkUrl}
 							onChange={(event) => setLinkUrl(event.target.value)}
 							onKeyDown={(event) => {
+								if (event.key === "Enter") {
+									event.preventDefault();
+									applyLink();
+								}
 								if (event.key === "Escape") setLinkOpen(false);
 							}}
 							placeholder="https://example.com"
 							aria-label={t("editor.insertLink")}
 							className="h-8 w-64 rounded-md border border-neutral-200 px-2 text-sm outline-none focus:border-blue-400"
 						/>
-						<button type="submit" className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
+						<button type="button" onClick={applyLink} className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
 							{t("editor.apply")}
 						</button>
-					</form>
+					</div>
 				)}
 			</div>
 		</div>

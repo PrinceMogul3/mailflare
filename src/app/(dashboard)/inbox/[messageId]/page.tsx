@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Cloud, ExternalLink } from "lucide-react";
+import { Cloud, ExternalLink } from "@/components/icons";
 import { useLanguage } from "@/components/language-provider";
 import { formatUserDate } from "@/lib/time/utils";
 import { MarkAsRead } from "@/components/mark-read";
@@ -40,15 +40,19 @@ import {
 } from "./utils";
 import { extractCloudAttachments } from "./cloud-attachment-utils";
 import { EmailHtmlRenderer } from "@/components/messages/email-html-renderer";
+import { getEmailAddress } from "@/lib/email/address";
+import { useRemoteContent } from "@/components/messages/use-remote-content";
 import clsx from "clsx";
 import { useAssistantOpen } from "@/components/agent/assistant-open-state";
 import { useMessageContentScroll } from "./use-message-content-scroll";
+import { useSendViewStatus } from "@/components/messages/use-send-view-status";
 
 export default function MessageDetailPage() {
   const { t } = useLanguage();
   const params = useParams<{ messageId: string }>();
   const { selectedMailbox, mailboxes } = useSelectedMailbox();
   const messageId = params.messageId;
+  useSendViewStatus(messageId);
   const [data, setData] = useState<MessageDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [previewAttachment, setPreviewAttachment] =
@@ -57,6 +61,10 @@ export default function MessageDetailPage() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [latestMessagesFirst] = useLatestMessagesFirst();
   const { enabled: showFullRecipientAddresses } = useShowFullRecipientAddresses();
+  const remote = useRemoteContent(
+    data?.message ? getEmailAddress(data.message.fromAddr) : undefined,
+    data?.message?.status === "spam",
+  );
   const { visible: messageListVisible } = useMessageListVisibility();
   usePageLoading(loading);
   const thread = useMessageThread(messageId, data?.message?.threadId);
@@ -82,7 +90,7 @@ export default function MessageDetailPage() {
         return;
       }
       setLoading(true);
-      const nextData = await fetchMessageDetail(messageId);
+      const nextData = await fetchMessageDetail(messageId).catch(() => fetchMessageDetail(messageId)).catch(() => ({ error: t("message.notFound") }));
       if (!cancelled) {
         setData(nextData);
         setLoading(false);
@@ -293,13 +301,13 @@ export default function MessageDetailPage() {
           {scheduledAt && <div className="px-4 sm:px-0 sm:pl-10"><ScheduledSendBanner messageId={message.id} scheduledAt={scheduledAt} /></div>}
           <div className="prose max-w-none px-4 text-neutral-900 sm:px-0 sm:pl-16">
             {htmlBody ? (
-              <EmailHtmlRenderer key={message.id} className="mx-auto" html={htmlBody} />
+              <EmailHtmlRenderer key={message.id} className="mx-auto" html={htmlBody} autoAllowRemote={remote.autoAllow} onAllowRemote={remote.allowSender} />
             ) : (
               <pre className="whitespace-pre-wrap text-sm text mx-auto">
                 {cloudAttachmentResult.content}
               </pre>
             )}
-            {quotedHtml && <QuotedEmailToggle html={quotedHtml} />}
+            {quotedHtml && <QuotedEmailToggle html={quotedHtml} autoAllowRemote={remote.autoAllow} onAllowRemote={remote.allowSender} />}
             {bodyDisplay.quotedContent.map((quotedContent) => (
               <PreviousMessage
                 key={`${quotedContent.dateLine}-${quotedContent.content.slice(0, 24)}`}
@@ -330,7 +338,8 @@ export default function MessageDetailPage() {
                         {t("message.openFrom", { provider: attachment.provider })}
                       </span>
                     </span>
-                    <ExternalLink className="h-4 w-4 shrink-0 text-neutral-400" />
+                    <ExternalLink className="h-4 w-4 shrink-0 text-neutral-400" aria-hidden="true" />
+                    <span className="sr-only"> ({t("common.opensInNewTab")})</span>
                   </a>
                 ))}
               </div>
@@ -380,4 +389,3 @@ export default function MessageDetailPage() {
   </>
   );
 }
-

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, CircleX, Database, RefreshCw } from "lucide-react";
+import { CheckCircle2, CircleX, Database, RefreshCw } from "@/components/icons";
 import { useLanguage } from "@/components/language-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -203,6 +203,7 @@ export function AdminUpdateCard() {
 						{result.runUrl && (
 							<a className="font-medium underline" href={result.runUrl} target="_blank" rel="noreferrer">
 								{t("update.viewWorkflow")}
+								<span className="sr-only"> ({t("common.opensInNewTab")})</span>
 							</a>
 						)}
 					</p>

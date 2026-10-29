@@ -2,17 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { formatUserDate } from "@/lib/time/utils";
-import { ChevronsUpDown, Paperclip } from "lucide-react";
+import { ChevronsUpDown, Paperclip } from "@/components/icons";
 import { ContactAvatar } from "@/components/contacts/contact-avatar";
 import { QuotedEmailToggle } from "@/components/messages/quoted-email-toggle";
 import { runSingleMessageAction } from "@/components/message-actions/utils";
 import { EmailHtmlRenderer } from "./email-html-renderer";
+import { useRemoteContent } from "./use-remote-content";
 import { getMessageBodyDisplay, resolveInlineAttachmentUrls } from "@/app/(dashboard)/inbox/[messageId]/utils";
 
 import { useLanguage } from "@/components/language-provider";
 import { cn } from "@/lib/utils";
 import type { ConversationMessageCardProps, ConversationThreadProps } from "./conversation-thread-types";
 import { ThreadMessageActions } from "./thread-message-actions";
+import { MessageOpenStatus } from "./message-open-status";
+import { MessageFollowUpStatus } from "@/components/follow-ups/message-follow-up-status";
 import {
 	getConversationRecipients,
 	getConversationSender,
@@ -127,6 +130,7 @@ export function ConversationMessageCard({
 	const expanded = locallyExpanded;
 	const sender = getConversationSender(message, currentAccountName);
 	const senderEmail = getConversationSenderEmail(message);
+	const remote = useRemoteContent(senderEmail, message.status === "spam");
 	const recipients = getConversationRecipients(message, showFullRecipientAddresses ? "full" : "address");
 	// const href = `${getMessageBackHref(message.direction, message.status)}/${message.id}`;
 	const outbound = message.direction === "outbound";
@@ -213,12 +217,14 @@ export function ConversationMessageCard({
 				</div>
 				{expanded && body && (
 					<div className="pb-4 pt-2 sm:pl-16">
+						{outbound && <MessageOpenStatus messageId={message.id} />}
+						{outbound && message.status !== "draft" && <MessageFollowUpStatus messageId={message.id} />}
 						{body.html ? (
-							<EmailHtmlRenderer html={body.html} />
+							<EmailHtmlRenderer html={body.html} autoAllowRemote={remote.autoAllow} onAllowRemote={remote.allowSender} />
 						) : (
 							<pre className="whitespace-pre-wrap font-sans text-sm text-neutral-900">{body.text}</pre>
 						)}
-						{body.quotedHtml && <QuotedEmailToggle html={body.quotedHtml} />}
+						{body.quotedHtml && <QuotedEmailToggle html={body.quotedHtml} autoAllowRemote={remote.autoAllow} onAllowRemote={remote.allowSender} />}
 						{attachments.length > 0 && (
 							<ul className="mt-4 flex flex-wrap gap-2">
 								{attachments.map((attachment) => (
